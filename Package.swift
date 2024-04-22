@@ -5,17 +5,23 @@ import PackageDescription
 
 let package = Package(
     name: "CBSGame",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "CBSGame",
-            targets: ["CBSGame"]),
+        // .library(
+        //     name: "CBSGame",
+        //     targets: ["CBSGame"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/mtynior/SwiftBus.git", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "CBSGame"),
+        .executableTarget(
+            name: "CBSGame", dependencies: ["SwiftBus"]),
         .testTarget(
             name: "CBSGameTests",
             dependencies: ["CBSGame"]),
