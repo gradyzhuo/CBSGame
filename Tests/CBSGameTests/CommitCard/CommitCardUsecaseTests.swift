@@ -1,26 +1,22 @@
 import XCTest
-@testable import CBSGame
+@testable import CBSGameCore
 
 
 final class CommitCardUsecaseTests: CBSGameTests {
 
     func testPlayerPlayCard() throws{
         let playerNameForTest = "Player1"
-        guard let gameId = createGame()else {
-            return
-        }
+        let gameId: String = createGame()
         
-        let playerId = createGamePlayer(gameId: gameId, playerName: playerNameForTest)
+        let player = createGamePlayer(gameId: gameId, playerName: playerNameForTest)
         let roundId = createRound(gameId: gameId, round: 0)
 
         try dealCard(gameId: gameId, cards: [.init(suit: .club, rank: .ace)])
 
         let usecase = CommitCardUsecase(gameRepository: gameRepository)
-        let cardIndexForTest = 0
-        let input: CommitCardInput = .init(gameId: gameId, roundId: roundId, playerId: playerId, cardIndex: cardIndexForTest)
+        let input: CommitCardInput = .init(gameId: gameId, roundId: roundId, playerId: player.playerId)
         let output: CommitCardOutput = try usecase.execute(input: input)
-        XCTAssertNotNil(output.id)
-
+        XCTAssertNotNil(output.committedCard)
 
         guard let game = gameRepository.find(byId: gameId) else {
             return

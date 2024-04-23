@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import CBSGame
+@testable import CBSGameCore
 
 final class PokeCardTest: XCTestCase {
     func testCreateCardsOfDeck() throws{

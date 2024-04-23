@@ -1,20 +1,18 @@
 import XCTest
-@testable import CBSGame
+@testable import CBSGameCore
 
 
-final class DetermineWinnerUsecaseTests: CBSGameTests {
+final class DetermineRoundWinnerUsecaseTests: CBSGameTests {
 
-    func testDetermineWinner() throws{ 
+    func testDetermineRoundWinner() throws{ 
         let winnerId = ""
 
-        guard let gameId = createGame() else {
-            return
-        }
+        let gameId = createGame()
 
-        let winnerPlayerId = createGamePlayer(gameId: gameId, playerName: "WinnerPlayerForTest")
-        let playerId2 = createGamePlayer(gameId: gameId, playerName: "Player2")
-        let playerId3 = createGamePlayer(gameId: gameId, playerName: "Player3")
-        let playerId4 = createGamePlayer(gameId: gameId, playerName: "Player4")
+        let winnerPlayer = createGamePlayer(gameId: gameId, playerName: "WinnerPlayerForTest")
+        let player2 = createGamePlayer(gameId: gameId, playerName: "Player2")
+        let player3 = createGamePlayer(gameId: gameId, playerName: "Player3")
+        let player4 = createGamePlayer(gameId: gameId, playerName: "Player4")
         
         let roundId = createRound(gameId: gameId, round: 0)
 
@@ -26,25 +24,15 @@ final class DetermineWinnerUsecaseTests: CBSGameTests {
         ])
 
         let commitCardUsecase = CommitCardUsecase.init(gameRepository: gameRepository)
-        for playerId in [winnerPlayerId, playerId2, playerId3, playerId4] {
-            let input = CommitCardInput.init(gameId: gameId, roundId: roundId, playerId: playerId, cardIndex: 0)
+        for player in [winnerPlayer, player2, player3, player4] {
+            let input = CommitCardInput.init(gameId: gameId, roundId: roundId, playerId: player.playerId)
             let output = try commitCardUsecase.execute(input: input)
         }
 
-        let usecase = DetermineWinnerUsecase(gameRepository: gameRepository)
-        let input = DetermineWinnerInput(gameId: gameId, roundId: roundId)
-        let output: DetermineWinnerOutput = usecase.execute(input: input)
+        let usecase = DetermineRoundWinnerUsecase(gameRepository: gameRepository)
+        let input = DetermineRoundWinnerInput(gameId: gameId, roundId: roundId)
+        let output: DetermineRoundWinnerOutput = usecase.execute(input: input)
         
-        XCTAssertEqual(output.winnerPlayerId, winnerPlayerId)
-
-        let winnerIdFromRepository = gameRepository.find(byId: gameId).flatMap{
-            $0.getRound(byId: roundId).flatMap{
-                $0.winnerPlayerId
-            }
-        }
-        
-        XCTAssertEqual(winnerIdFromRepository, winnerPlayerId)
-
-
+        XCTAssertEqual(output.winnerPlayer?.playerId, winnerPlayer.playerId)
     }
 }

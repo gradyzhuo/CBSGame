@@ -6,23 +6,24 @@
 //
 
 import XCTest
-@testable import CBSGame
+@testable import CBSGameCore
 
-final class CreateHumanPlayerUsecaseTest: CBSGameTests {
+final class CreatePlayerUsecaseTest: CBSGameTests {
 
     func testCreateANewPlayer() throws{
         let playerName: String = "Player"
 
-        guard let gameId: String = createGame() else {
-            return
-        }
-        let usecase = CreateHumanPlayerUsecase.init(gameRepository: gameRepository)
-        let input = CreateHumanPlayerInput(
+        let policyForTest = AlwayFirst.init()
+
+        let gameId: String = createGame()
+        let usecase = CreatePlayerUsecase.init(gameRepository: gameRepository)
+        let input = CreatePlayerInput(
             gameId: gameId,
-            playerName: playerName
+            playerName: playerName,
+            policy: policyForTest
         )
         let output = usecase.execute(input: input)
-        XCTAssertNotNil(output.id)
+        XCTAssertNotNil(output.playerDto)
 
         let game:CBSGame! = gameRepository.find(byId: gameId)
         XCTAssertEqual(game.joinedPlayers.count, 1)

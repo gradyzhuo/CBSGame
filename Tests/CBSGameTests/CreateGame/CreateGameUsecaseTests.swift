@@ -1,11 +1,11 @@
 import XCTest
-@testable import CBSGame
+@testable import CBSGameCore
 
 
 final class CreateCBSGameUsecaseTest: CBSGameTests {
     func testCreateGame() throws{
 
-        let usecase = CreateCBSGameUsecase(repository: gameRepository)
+        let usecase: CreateCBSGameUsecase = CreateCBSGameUsecase(repository: gameRepository)
         let input: CreateCBSGameInput = CreateCBSGameInput()
         let output = usecase.execute(input: input)
         XCTAssertNotNil(output.id)

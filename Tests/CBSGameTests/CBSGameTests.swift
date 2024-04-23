@@ -1,24 +1,35 @@
 import XCTest
-@testable import CBSGame
+@testable import CBSGameCore
+
+
+public struct AlwayFirst: PlayPolicy {
+
+    public func playCard(player: PlayerDto) throws -> Cards.Index {
+        return 0
+    }
+
+    
+}
 
 class CBSGameTests: XCTestCase {
     let gameRepository: CBSGameRepository = CBSGameRepository.init()
 
-    func createGame()->String? {
+    func createGame()->String {
         let usecase = CreateCBSGameUsecase(repository: gameRepository)
         let input = CreateCBSGameInput.init()
         let output = usecase.execute(input: input)
-        return output.id
-    }
-
-    func createGamePlayer(gameId: String, playerName: String)->String {
-        let usecase = CreateHumanPlayerUsecase(gameRepository: gameRepository)
-        let input: CreateHumanPlayerInput = .init(gameId: gameId, playerName: playerName)
-        let output: CreateHumanPlayerOutput = usecase.execute(input: input)
         return output.id!
     }
 
-    func createGamePlayers(gameId: String, playerNames: [String])-> [String]{
+    func createGamePlayer(gameId: String, playerName: String)->PlayerDto {
+        let policyForTest = AlwayFirst()
+        let usecase = CreatePlayerUsecase(gameRepository: gameRepository)
+        let input: CreatePlayerInput = .init(gameId: gameId, playerName: playerName, policy: policyForTest)
+        let output: CreatePlayerOutput = usecase.execute(input: input)
+        return output.playerDto!
+    }
+
+    func createGamePlayers(gameId: String, playerNames: [String])-> [PlayerDto]{
         return playerNames.map{
             createGamePlayer(gameId: gameId, playerName: $0)
         }
