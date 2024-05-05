@@ -12,19 +12,37 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         // .library(
         //     name: "CBSGame",
-        //     targets: ["CBSGame"]),
+        //     targets: ["CBSGame", "CBSPlayer", "DDD"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/mtynior/SwiftBus.git", .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/dannys42/Causality.git", from: "0.0.6")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .executableTarget(name: "Executor", dependencies: ["CBSGameCore"]),
+        .executableTarget(name: "Executor", dependencies: ["CBSGame", "CBSPlayer"]),
         .target(
-            name: "CBSGameCore", dependencies: ["SwiftBus"]),
+            name: "DDD"),
+        .target(
+            name: "CardGame"),
+        .target(
+            name: "CBSGame", dependencies: [
+                "DDD",
+                "CBSPlayer",
+                "CardGame",
+                .product(name: "Causality", package: "causality")
+            ]),
+        .target(
+            name: "CBSPlayer", dependencies: [
+                "DDD",
+                "CardGame"
+            ]),
+        
         .testTarget(
             name: "CBSGameTests",
-            dependencies: ["CBSGameCore"]),
+            dependencies: ["CBSGame", "CBSPlayer", "DDD"]),
+        .testTarget(
+            name: "CBSGamePlayerTests",
+            dependencies: ["CBSPlayer"]),
     ]
 )

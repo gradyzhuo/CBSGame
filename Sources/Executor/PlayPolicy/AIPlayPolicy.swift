@@ -1,8 +1,8 @@
-import CBSGameCore
-public struct AIPlayPolicy: PlayPolicy{
+// import CBSGame
+// public struct AIPlayPolicy: PlayPolicy{
 
-    public func playCard(player: PlayerDto) throws -> Cards.Index {
-        return player.handCards.indices.randomElement()!
-    }
+//     public func playCard(player: PlayerDto) throws -> Cards.Index {
+//         return player.handCards.indices.randomElement()!
+//     }
 
-}
+// }

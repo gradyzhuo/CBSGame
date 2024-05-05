@@ -1,13 +1,13 @@
 {
-  "originHash" : "9b47c4bb372b456121ece9b039916f4b31dd8d93606abfc8f4a9e9f8d04be608",
+  "originHash" : "1a70f4a08908a6d3ddcf04dbbb5b808ee32c2bd851c00b2851317c582bbe14c0",
   "pins" : [
     {
-      "identity" : "swiftbus",
+      "identity" : "causality",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mtynior/SwiftBus.git",
+      "location" : "https://github.com/dannys42/Causality.git",
       "state" : {
-        "revision" : "d0a8129f0541195a9be1fb80e74ddd45d05ebd44",
-        "version" : "1.0.1"
+        "revision" : "4122e2059ffb26f051869c5d3c0d4c2dfd9096a5",
+        "version" : "0.0.6"
       }
     }
   ],
