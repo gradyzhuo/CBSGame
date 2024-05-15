@@ -4,23 +4,23 @@ import XCTest
 
 final class CommitCardUsecaseTests: CBSGameTests {
 
-    func testPlayerPlayCard() throws{
+    func testPlayerPlayCard() async throws{
         let playerNameForTest = "Player1"
         let roundIndex = 0
-        let gameId: String = createGame()
+        let gameId: String = try await createGame()
         
-        let player = createGamePlayer(gameId: gameId, playerName: playerNameForTest)
-        createRound(gameId: gameId, round: roundIndex)
+        let player = try await createGamePlayer(gameId: gameId, playerName: playerNameForTest)
+        try await createRound(gameId: gameId, round: roundIndex)
 
         let cardForTest: PokeCard = .init(suit: .club, rank: .ace)
-        try dealCard(gameId: gameId, cards: [cardForTest])
+        try await dealCard(gameId: gameId, cards: [cardForTest])
 
-        let usecase = CommitCardUsecase(gameRepository: gameRepository, eventBus: domainEventBus)
+        let usecase = CommitCardService(repository: gameRepository, eventBus: domainEventBus)
         let input: CommitCardInput = .init(gameId: gameId, roundIndex: roundIndex, playerId: player, chooseCard: cardForTest)
-        let output: CommitCardOutput = try usecase.execute(input: input)
+        let output: CommitCardOutput = try await usecase.execute(input: input)
         XCTAssertNotNil(output.committedCard)
 
-        guard let game = gameRepository.find(byId: gameId) else {
+        guard let game = try await gameRepository.find(byId: gameId) else {
             return
         }
         

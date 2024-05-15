@@ -1,25 +1,27 @@
 import DDD
 import Foundation
 
-public struct WhenGameDealCardListener: DomainEventListener {
-    public init(playerRepository: PlayerRepository, domainEventBus: any DomainEventBus) {
-        self.playerRepository = playerRepository
+public struct WhenGameDealCardListener<RepositoryType: PlayerRepository>: DomainEventListener {
+
+    public init(repository: RepositoryType, domainEventBus: any DomainEventBus) {
+        self.repository = repository
         self.domainEventBus = domainEventBus
     }
 
     public typealias EventType = CardDealed
 
-    let playerRepository: PlayerRepository
+    let repository: RepositoryType
     let domainEventBus: DomainEventBus
 
-    public func observed(event: CardDealed) throws {
-        guard let player = playerRepository.find(byId: event.playerId) else {
+    @MainActor
+    public func observed(event: CardDealed) async throws {
+        guard let player = try await repository.find(byId: event.playerId) else {
             return
         }
 
         try player.take(handCard: event.card)
 
-        try domainEventBus.postAllEvent(fromSource: player)
-        try playerRepository.save(aggregateRoot: player)
+        try await domainEventBus.postAllEvent(fromSource: player)
+        try await repository.save(aggregateRoot: player)
     }
 }

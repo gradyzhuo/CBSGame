@@ -8,7 +8,11 @@ public enum PlayerError : Error{
 }
 
 public class Player: AggregateRoot, DomainEventSource{
-    public var coordinator: EventStorageCoordinator<Player>
+    public var revision: UInt64?
+
+    public var eventStorage: Storage = .init()
+
+    public typealias Storage = DomainEventInMemoryStorage
 
     public var id: String
     public var name: String
@@ -20,7 +24,6 @@ public class Player: AggregateRoot, DomainEventSource{
         self.name = name
         self.gameId = gameId
         self.handCards = []
-        self.coordinator = .init(id: id)
 
         try! self.add(event: PlayerCreated(id: id, gameId: gameId, name: name))
     }

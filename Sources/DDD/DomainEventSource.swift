@@ -1,9 +1,23 @@
 import Foundation
 
-public protocol DomainEventSource: AnyObject {
-    associatedtype AggregateRootType: AggregateRoot 
+public protocol DomainEventStorage : AnyObject{
+    var events: [any DomainEvent] { set get }
+}
 
-    var coordinator: EventStorageCoordinator<AggregateRootType> { get }
+public class DomainEventInMemoryStorage: DomainEventStorage {
+    public init(events: [any DomainEvent] = []) {
+        self.events = events
+    }
+
+    public var events: [ any DomainEvent ] = []
+
+}
+
+public protocol DomainEventSource {
+    associatedtype Storage: DomainEventStorage
+
+    var eventStorage: Storage { get }
+    var revision: UInt64? { set get }
 
     func apply(event: some DomainEvent) throws
     
@@ -14,23 +28,16 @@ extension DomainEventSource {
 
     public var events: [DomainEvent] {
         get{
-            return coordinator.events
+            return eventStorage.events
         }
     }
 
     public func add(event: some DomainEvent) throws {
-        coordinator.events.append(event)
+        eventStorage.events.append(event)
         try apply(event: event)
     }
 
-
-    public func addEvents(from coordinator: EventStorageCoordinator<AggregateRootType>) throws {
-        for event in coordinator.events{
-            try self.add(event: event)
-        }
-    }
-
     public func clearAllDomainEvents() throws {
-        coordinator.events.removeAll()
+        eventStorage.events.removeAll()
     }
 }

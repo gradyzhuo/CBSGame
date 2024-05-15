@@ -1,22 +1,24 @@
 import Foundation
 
-
-
 public protocol DomainEventBus {
-    func publish<EventType: DomainEvent>(event: EventType) throws
-    func subscribe<EventType: DomainEvent>(to eventType: EventType.Type, handler: @escaping (_ event: EventType) throws ->Void) rethrows
+    func publish<EventType: DomainEvent>(event: EventType) async throws
+    func subscribe<EventType: DomainEvent>(to eventType: EventType.Type, handler: @escaping (_ event: EventType) async throws -> Void) rethrows
 }
 
-extension DomainEventBus {
-    public func postAllEvent(fromSource source: some DomainEventSource) throws{
-        for event in source.events{
-            try self.publish(event: event)
+public extension DomainEventBus {
+    func postAllEvent(fromSource source: some DomainEventSource) async throws {
+        for event in source.events {
+            try await publish(event: event)
         }
     }
-    
-    public func register<Listener: DomainEventListener>(listener: Listener) throws {
-        try self.subscribe(to: Listener.EventType.self){
-            try listener.observed(event: $0)
+
+    func register<Listener: DomainEventListener>(listener: Listener) throws {
+        // let event: Listener.EventType = await withUnsafeContinuation { continuation in
+                
+        //     }
+        //     try await listener.observed(event: event)
+        try self.subscribe(to: Listener.EventType.self) { event in
+            try await listener.observed(event: event)
         }
     }
 }

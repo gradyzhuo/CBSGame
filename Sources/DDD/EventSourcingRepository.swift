@@ -1,30 +1,30 @@
 import Foundation
 
-public protocol EventSourcingRepository: AnyObject {
+public protocol EventSourcingRepository<AggregateRootType>: AnyObject {
     associatedtype AggregateRootType: AggregateRoot where AggregateRootType: DomainEventSource
+    associatedtype EventStorageType: EventStorageCoordinator where EventStorageType.AggregateRootType == AggregateRootType
     typealias Id = AggregateRootType.Id
 
-    var coordinators : [EventStorageCoordinator<Self.AggregateRootType>] { set get }
+    var coordinator : EventStorageType { get }
 }
 
 extension EventSourcingRepository {
-    public func find(byId id: Id) -> AggregateRootType?{
-        
-        guard let coordinator = (coordinators.first{ $0.id == id }) else {
+    public func find(byId id: Id) async throws -> AggregateRootType?{
+        guard let events = try await coordinator.fetchEvents(byId: id) else {
             return nil
         }
-        return try? .init(events: coordinator.events)
+        return try? .init(events: events)
     }
 
-    public func save(aggregateRoot: AggregateRootType) throws {
-        var index = (coordinators.firstIndex{ $0.id == aggregateRoot.id })
-        if index == nil {
-            index = coordinators.count
-            coordinators.append(EventStorageCoordinator(id: aggregateRoot.id))
-        } 
+    public func save(aggregateRoot: AggregateRootType) async throws {
+        // var index = (coordinators.firstIndex{ $0.id == aggregateRoot.id })
+        // if index == nil {
+        //     index = coordinators.count
+        //     coordinators.append(.init(id: aggregateRoot.id))
+        // } 
 
-        let coordinator = coordinators[index!]
-        coordinator.events.append(contentsOf: aggregateRoot.events)
+        // let coordinator = coordinators[index!]
+        try await coordinator.append(events: aggregateRoot.events, byId: aggregateRoot.id)
         try aggregateRoot.clearAllDomainEvents()
     }
 

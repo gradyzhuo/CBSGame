@@ -1,37 +1,18 @@
 import Foundation
 import DDD
 
-public class CBSGameRepository: EventSourcingRepository {
-    public var coordinators: [EventStorageCoordinator<CBSGame>]
+public protocol CBSGameRepository : EventSourcingRepository<CBSGame>{
 
-    public typealias AggregateRootType = CBSGame
+}
 
+extension InMemoryCoordinator : Sendable {
+
+}
+
+public actor CBSGameInMemoryRepository: CBSGameRepository {
+    public let coordinator: InMemoryCoordinator<CBSGame>
+    
     public init(){
-        self.coordinators = []
+        self.coordinator = .init()
     }
 }
-// public class CBSGameRepository {
-//     var aggregates: [CBSGame]
-    
-//     public init(){
-//         self.aggregates = []
-//     }
-    
-//     public func find(byId id: String) -> CBSGame?{
-//         return aggregates.filter{
-//             $0.id == id
-//         }.first
-//     }
-
-//     public func save(aggregate: CBSGame) {
-//         delete(byId: aggregate.id)
-//         aggregates.append(aggregate)
-//     }
-
-//     public func delete(byId id: String){
-//         aggregates.removeAll{
-//             $0.id == id
-//         }
-//     }
-
-// }

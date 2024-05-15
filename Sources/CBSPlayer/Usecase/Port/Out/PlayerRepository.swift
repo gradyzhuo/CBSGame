@@ -1,12 +1,14 @@
 import Foundation
 import DDD
 
-public class PlayerRepository: EventSourcingRepository {
-    public var coordinators: [EventStorageCoordinator<Player>]
+public protocol PlayerRepository: EventSourcingRepository<Player> {
+    
+}
 
-    public typealias AggregateRootType = Player
-
+public class PlayerInMemoryRepository: PlayerRepository {
+    public var coordinator: InMemoryCoordinator<Player>
+    
     public init(){
-        self.coordinators = []
+        self.coordinator = .init()
     }
 }

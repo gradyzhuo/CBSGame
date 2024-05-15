@@ -8,7 +8,11 @@ public enum CBSGameError: Error{
 }
 
 public class CBSGame: AggregateRoot, DomainEventSource {
-    public var coordinator: EventStorageCoordinator<CBSGame>
+    public var revision: UInt64?
+
+    public var eventStorage: Storage = .init()
+
+    public typealias Storage = DomainEventInMemoryStorage
 
     public private(set) var id: String
     public private(set) var joinedPlayers: [String] = []
@@ -29,7 +33,6 @@ public class CBSGame: AggregateRoot, DomainEventSource {
 
     init(id: String){
         self.id = id 
-        self.coordinator = .init(id: self.id)
         try! self.add(event: GameCreated(id: id))
     }
 
@@ -104,6 +107,7 @@ public class CBSGame: AggregateRoot, DomainEventSource {
         //     return
         // }
         // player.add(handCard: event.card)
+        // self.deck.remove(card: event.card)
     }
     
     func when(_ event: RoundCreated){

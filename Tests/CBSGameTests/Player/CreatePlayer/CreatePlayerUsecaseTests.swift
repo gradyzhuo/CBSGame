@@ -10,19 +10,19 @@ import XCTest
 
 final class CreatePlayerUsecaseTest: CBSGameTests {
 
-    func testCreateANewPlayer() throws {
+    func testCreateANewPlayer() async throws {
         let playerName: String = "Player for testing."
 
-        let gameId: String = createGame()
-        let usecase = CreatePlayerUsecase.init(playerRepository: playerRepository, eventBus: domainEventBus)
+        let gameId: String = try await createGame()
+        let usecase = CreatePlayerService(repository: playerRepository, eventBus: domainEventBus)
         let input = CreatePlayerInput(
             gameId: gameId,
             playerName: playerName
         )
-        let output = try usecase.execute(input: input)
+        let output = try await usecase.execute(input: input)
         XCTAssertNotNil(output.playerId)
 
-        let player = playerRepository.find(byId: output.playerId!)
+        let player = try await playerRepository.find(byId: output.playerId!)
         XCTAssertEqual(player?.name, playerName)
     }
 }

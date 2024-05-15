@@ -14,43 +14,43 @@ import XCTest
 // }
 
 class CBSGameTests: XCTestCase {
-    let gameRepository = CBSGameRepository.init()
-    let playerRepository = PlayerRepository.init()
-    let domainEventBus: DomainEventBus = CausalityBusAdapter(queue: .global())
+    let gameRepository = CBSGameInMemoryRepository()
+    let playerRepository = PlayerInMemoryRepository()
+    let domainEventBus = EventBus()// CausalityBusAdapter(queue: .main)
 
-    func createGame() ->String {
-        let usecase = CreateCBSGameUsecase(repository: gameRepository, eventBus: domainEventBus)
+    func createGame() async throws ->String {
+        let usecase = CreateCBSGameService(repository: gameRepository, eventBus: domainEventBus)
         let input = CreateCBSGameInput.init()
-        let output = try! usecase.execute(input: input)
+        let output = try await usecase.execute(input: input)
         return output.id!
     }
 
-    func createGamePlayer(gameId: String, playerName: String)-> String {
+    func createGamePlayer(gameId: String, playerName: String) async throws-> String {
         // let policyForTest = AlwayFirst()
-        let usecase = CreatePlayerUsecase(playerRepository: playerRepository, eventBus: domainEventBus)
+        let usecase = CreatePlayerService(repository: playerRepository, eventBus: domainEventBus)
         let input: CreatePlayerInput = .init(gameId: gameId, playerName: playerName)
-        let output: CreatePlayerOutput = try! usecase.execute(input: input)
+        let output: CreatePlayerOutput = try await usecase.execute(input: input)
         return output.playerId!
     }
 
-    func createRound(gameId: String, round: Int) -> String? {
-        let usecase = CreateRoundUsecase(gameRepository: gameRepository, eventBus: domainEventBus)
+    func createRound(gameId: String, round: Int) async throws -> String? {
+        let usecase = CreateRoundService(repository: gameRepository, eventBus: domainEventBus)
         let input: CreateRoundInput = .init(gameId: gameId, roundIndex: round)
-        let output = try! usecase.execute(input: input)
+        let output = try await usecase.execute(input: input)
         return output.id
     }
 
-    func dealCard(gameId: String, cards: [PokeCard]) throws -> String{
+    func dealCard(gameId: String, cards: [PokeCard]) async throws -> String{
         let dealCardInput: DealCardInput = DealCardInput.init(gameId: gameId, cards: cards)
-        let dealCardUsecase: DealCardUsecase = DealCardUsecase(gameRepository: gameRepository, eventBus: domainEventBus)
-        let dealCardUsecaseOutput = try dealCardUsecase.execute(input: dealCardInput)
+        let dealCardUsecase = DealCardService(repository: gameRepository, eventBus: domainEventBus)
+        let dealCardUsecaseOutput = try await dealCardUsecase.execute(input: dealCardInput)
         return dealCardUsecaseOutput.id!
     }
 
-    func playCard(gameId: String, playerId: String, round: Int, cardIndex: Int ) throws -> PokeCard? {
+    func playCard(gameId: String, playerId: String, round: Int, cardIndex: Int ) async throws -> PokeCard? {
         let input = PlayCardInput(gameId: gameId, playerId: playerId, round: round, cardIndex: cardIndex)
-        let usecase = PlayCardUsecase(playerRepository: playerRepository, eventBus: domainEventBus)
-        let output = try usecase.execute(input: input)
+        let usecase = PlayCardService(repository: playerRepository, eventBus: domainEventBus)
+        let output = try await usecase.execute(input: input)
         return output.playedCard
     }
 

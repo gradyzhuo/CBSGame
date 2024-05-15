@@ -2,25 +2,27 @@ import CBSPlayer
 import DDD
 import Foundation
 
-public struct WhenPlayerPlayedCardListener: DomainEventListener {
-    public init(gameRepository: CBSGameRepository, domainEventBus: any DomainEventBus) {
+public struct WhenPlayerPlayedCardListener<RepositoryType: CBSGameRepository>: DomainEventListener {
+    public init(gameRepository: RepositoryType, domainEventBus: any DomainEventBus) {
         self.gameRepository = gameRepository
         self.domainEventBus = domainEventBus
     }
 
     public typealias EventType = CardPlayed
 
-    let gameRepository: CBSGameRepository
+    let gameRepository: RepositoryType
     let domainEventBus: DomainEventBus
 
-    public func observed(event: CBSPlayer.CardPlayed) throws {
-        guard let game: CBSGameRepository.AggregateRootType = gameRepository.find(byId: event.gameId) else {
+    @MainActor
+    public func observed(event: CBSPlayer.CardPlayed) async throws {
+        guard let game: RepositoryType.AggregateRootType = try await gameRepository.find(byId: event.gameId) else {
             return
         }
 
         game.commitCard(roundIndex: event.round, playerId: event.playerId, card: event.card)
         
-        try domainEventBus.postAllEvent(fromSource: game)
-        try gameRepository.save(aggregateRoot: game)
+        try await domainEventBus.postAllEvent(fromSource: game)
+        try await gameRepository.save(aggregateRoot: game)
+        
     }
 }

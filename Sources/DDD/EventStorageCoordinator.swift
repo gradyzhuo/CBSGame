@@ -1,14 +1,16 @@
 import Foundation
 
-public class EventStorageCoordinator<AggregateRootType: AggregateRoot>{
-    public internal(set) var id: AggregateRootType.Id
-    public internal(set) var events: [any DomainEvent] = []
+public protocol EventStorageCoordinator<AggregateRootType>: AnyObject {
+    associatedtype AggregateRootType: AggregateRoot
 
-    public init(id: AggregateRootType.Id){
-        self.id = id
-    }
+    func fetchEvents(byId id: AggregateRootType.Id) async throws -> [any DomainEvent]?
+    func append(event: any DomainEvent, byId aggregateRootId: AggregateRootType.Id) async throws -> UInt64?
+}
 
-    internal func appendEvents(fromCoordinator coordinator: EventStorageCoordinator) {
-        events.append(contentsOf: coordinator.events)
+extension EventStorageCoordinator {
+    public func append(events: [DomainEvent], byId aggregateRootId: AggregateRootType.Id) async throws{
+        for event in events {
+            try await append(event: event, byId: aggregateRootId)
+        }
     }
 }

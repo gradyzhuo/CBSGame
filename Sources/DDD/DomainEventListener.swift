@@ -3,5 +3,5 @@ import Foundation
 public protocol DomainEventListener {
     associatedtype EventType: DomainEvent
 
-    func observed(event: EventType) throws
+    @MainActor func observed(event: EventType) async throws
 }

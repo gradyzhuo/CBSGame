@@ -10,7 +10,7 @@ public final class CausalityBusAdapter : DomainEventBus {
         self.eventBus = .init(label: "\(Self.self)", queue: queue)
     }
 
-    public func publish<EventType>(event: EventType) throws where EventType : DomainEvent {
+    public func publish<EventType>(event: EventType) async throws where EventType : DomainEvent {
         let eventType = "\(EventType.self)"
         let causalityEvent = Causality.Event<EventType>(label: eventType)
         if let eventId = eventIds[eventType] {
@@ -19,20 +19,21 @@ public final class CausalityBusAdapter : DomainEventBus {
         eventBus.publish(event: causalityEvent, message: event)
     }
 
-    public func subscribe<EventType>(to eventType: EventType.Type, handler: @escaping (EventType) throws -> Void) rethrows where EventType : DomainEvent {
+    public func subscribe<EventType>(to eventType: EventType.Type, handler: @escaping (EventType) async throws -> Void) rethrows  where EventType : DomainEvent {
         let eventType = "\(eventType.self)"
         
         let e = Causality.Event<EventType>(label: eventType)
         eventIds[eventType] = e.causalityEventId 
-
         eventBus.subscribe(e) { (message: EventType) in
-            do{
-                try handler(message)
-            }catch {
+            Task.detached(priority: .high){ @MainActor in
+                do{
+                try await handler(message)
+            }catch{
                 fatalError()
             }
-            
+            }
         }
+        
     }
 
     
